@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/migrations/01_init-profile.sql
+  - include:
+      file: liquibase/migrations/02_init-chat.sql
+  - include:
+      file: liquibase/migrations/03_init-messages.sql
