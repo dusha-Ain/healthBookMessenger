@@ -1,4 +1,55 @@
 services:
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    platform: linux/arm64
+    ports:
+      - "9092:9092"   # Для бекендов на хосте
+      - "9093:9093"   # Для внутренних сервисов в Docker
+    environment:
+      # KRaft настройки
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9094"
+
+      # Слушатели (3 разных порта)
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9094"
+
+      # Рекламируем разные адреса для разных случаев
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092"
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT"
+
+      # Важно для KRaft
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+      # Для одиночного узла
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    networks:
+      - kafka-network
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9093", "--list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafbat-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafbat-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local-kafka"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:9093"  # ← внутреннее имя
+      KAFKA_CLUSTERS_0_CONNECT_TIMEOUT_SECONDS: 30
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - kafka-network
 
   postgres:
     image: "postgres"
@@ -9,6 +60,11 @@ services:
       POSTGRES_PASSWORD: bookMessenger
       POSTGRES_DB: bookMessenger
     ports:
-      - 5435:5432
+      - "5435:5432"
     labels:
       org.springframework.boot.service-connection: postgres
+
+networks:
+  kafka-network:
+    driver: bridge
+

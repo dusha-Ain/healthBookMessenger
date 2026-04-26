@@ -1,4 +1,4 @@
-package com.rent.healthbookmessenger.entity;
+package com.rent.healthbookmessenger.message.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,13 +34,6 @@ public record Message(
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         @Schema(description = "Дата и время отправки сообщения",
                 example = "2024-01-15 14:30:00")
-        LocalDateTime sentAt,
-
-        @Null
-        @Schema(description = "Метка редактирования", example = "false")
-        Boolean edited,
-
-        @Null
-        @Schema(description = "Метка удаления", example = "false")
-        Boolean deleted) {
+        LocalDateTime sentAt
+) {
 }

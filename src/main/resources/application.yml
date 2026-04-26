@@ -16,3 +16,36 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:liquibase/changelog-master.yml
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: chat-microservice
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      # 👇 ДОБАВЬ ТАЙМАУТЫ
+      properties:
+        session.timeout.ms: 45000
+        heartbeat.interval.ms: 3000
+        max.poll.interval.ms: 300000
+        request.timeout.ms: 60000
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+      producer:
+        # 👇 ДЛЯ ПРОДЮСЕРА
+        properties:
+          request:
+            timeout:
+              ms: 60000
+          delivery:
+            timeout:
+              ms: 120000
+      listener:
+        # 👇 КОНТЕЙНЕРУ
+        ack-mode: manual_immediate
+        missing-topics-fatal: false
+
+default:
+  page:
+    size: 5
+    number: 0

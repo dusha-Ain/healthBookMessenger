@@ -1,4 +1,4 @@
-package com.rent.healthbookmessenger.entity;
+package com.rent.healthbookmessenger.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,23 +14,26 @@ public record Chat(
         Long id,
 
         @NotNull
-        @Schema(description = "Идентификатор 1-ого пользователя",
+        @Schema(description = "Идентификатор пользователя",
                 example = "0ded9ae3-22c3-4ce6-97b0-53fe1d50217d")
-        UUID IdUser1,
+        UUID idProfile,
 
         @NotNull
-        @Schema(description = "Идентификатор 2-ого пользователя",
+        @Schema(description = "Идентификатор консультанта",
                 example = "151b3cd3-7a37-4e1f-a4c8-528d65b592b5")
-        UUID idUser2,
+        UUID idConsultant,
+
+        String status,
 
         @Null
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         @Schema(description = "Дата и время создания чата",
-                example = "2024-01-15 14:30:00")
+                example = "2024-01-15 14:30:00")// WAITING_FOR_CONSULTANT, ACTIVE, CLOSED
         LocalDateTime createdAt,
 
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         @Schema(description = "Дата и время создания последнего сообщения",
                 example = "2024-01-15 14:30:00")
-        LocalDateTime lastMessageAt) {
+        LocalDateTime lastMessageAt
+) {
 }
