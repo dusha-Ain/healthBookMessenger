@@ -25,6 +25,7 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public Profile getProfile(@PathVariable UUID id) {
+        logger.info("Called getProfile from microservice");
         Profile profile = service.getProfile(id);
         if (profile == null) {
             throw new EntityNotFoundException("Профиль не найден");
