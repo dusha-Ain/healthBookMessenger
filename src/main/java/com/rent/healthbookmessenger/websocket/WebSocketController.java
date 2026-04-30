@@ -7,9 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Controller
@@ -18,9 +20,12 @@ public class WebSocketController {
     private static final Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     private final MessageService messageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public WebSocketController(MessageService messageService) {
+    public WebSocketController(MessageService messageService,
+                               SimpMessagingTemplate messagingTemplate) {
         this.messageService = messageService;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -47,7 +52,7 @@ public class WebSocketController {
         log.info("Пользователь {} подключился к чату {}", userId, chatId);
 
         // Сохраняем информацию в сессии WebSocket
-        headerAccessor.getSessionAttributes().put("chatId", chatId);
+        Objects.requireNonNull(headerAccessor.getSessionAttributes()).put("chatId", chatId);
         headerAccessor.getSessionAttributes().put("userId", userId);
     }
 
@@ -62,6 +67,17 @@ public class WebSocketController {
         Boolean isTyping = Boolean.valueOf(payload.get("typing").toString());
 
         log.debug("Пользователь {} печатает в чате {}: {}", userId, chatId, isTyping);
-        // TODO: Отправить статус другим участникам чата
+        // Отправляем статус печатания всем участникам чата (кроме отправителя)
+        TypingStatus typingStatus = new TypingStatus(
+                chatId,
+                userId,
+                isTyping,
+                System.currentTimeMillis()
+        );
+
+        // Отправляем в топик статусов конкретного чата
+        messagingTemplate.convertAndSend("/topic/chat." + chatId + ".typing", typingStatus);
     }
+
+
 }
