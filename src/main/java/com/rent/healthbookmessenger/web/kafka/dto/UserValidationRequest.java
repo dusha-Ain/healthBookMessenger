@@ -5,7 +5,7 @@ import java.util.UUID;
 public class UserValidationRequest {
     private String idRequest;
     private UUID idUser;
-    private String action;  // CHECK_EXISTS, GET_PROFILE, VALIDATE_ROLE
+    private String action;
 
     public UserValidationRequest() {}
 

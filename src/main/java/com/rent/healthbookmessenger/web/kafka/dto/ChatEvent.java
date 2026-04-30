@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class ChatEvent {
 
-    private String eventType;  // MESSAGE_SENT, CHAT_CREATED, CHAT_CLOSED, CONSULTANT_JOINED
+    private String eventType;
 
     private Long idChat;
 

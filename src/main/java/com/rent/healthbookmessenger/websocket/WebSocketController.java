@@ -24,15 +24,15 @@ public class WebSocketController {
     }
 
 
-//    /**
-//     * Отправка сообщения через WebSocket
-//     * Клиент отправляет на /app/chat.send
-//     */
-//    @MessageMapping("/chat.send")
-//    public Message sendMessage(@Payload SendMessageRequest request) {
-//        log.info("WebSocket: сообщение от {} в чат {}", request.getIdSender(), request.getIdChat());
-//        return messageService.sendMessage(request);
-//    }
+    /**
+     * Отправка сообщения через WebSocket
+     * Клиент отправляет на /app/chat.send
+     */
+    @MessageMapping("/chat.send")
+    public Message sendMessage(@Payload Message request) {
+        log.info("WebSocket: сообщение от {} в чат {}", request.idSender(), request.idChat());
+        return messageService.sendMessage(request);
+    }
 
     /**
      * Подключение к чату

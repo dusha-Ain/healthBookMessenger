@@ -71,7 +71,7 @@ public class MessageDao {
     public boolean editMessage(Long id, String newContent) {
         String sql = "UPDATE message SET content = :content WHERE id = :id";
         var map = new MapSqlParameterSource()
-                .addValue("idMessage", id)
+                .addValue("id", id)
                 .addValue("content", newContent);
         return 1 == template.update(sql, map);
     }

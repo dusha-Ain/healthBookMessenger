@@ -4,6 +4,7 @@ package com.rent.healthbookmessenger.profile.service;
 import com.rent.healthbookmessenger.profile.dto.Profile;
 import com.rent.healthbookmessenger.web.kafka.dto.UserValidationRequest;
 import com.rent.healthbookmessenger.web.kafka.dto.UserValidationResponse;
+import com.rent.healthbookmessenger.web.kafka.dto.enums.ProfileAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,8 @@ public class ProfileService {
     private final ObjectMapper objectMapper;
 
     // Хранилище ожидающих ответов
-    private final Map<String, CompletableFuture<UserValidationResponse>> pendingRequests = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<UserValidationResponse>> pendingRequests =
+            new ConcurrentHashMap<>();
 
     @Autowired
     public ProfileService(KafkaTemplate<String, Object> kafkaTemplate) {
@@ -38,11 +40,11 @@ public class ProfileService {
     /**
      * Проверить, существует ли пользователь
      */
-    public boolean userExists(UUID userId) {
-        log.debug("Проверка существования пользователя: {}", userId);
-        UserValidationResponse response = sendRequest(userId, "CHECK_EXISTS");
+    public boolean userExists(UUID idProfile) {
+        log.debug("Проверка существования пользователя: {}", idProfile);
+        UserValidationResponse response = sendRequest(idProfile, ProfileAction.CHECK_EXISTS.name());
         boolean exists = response != null && response.isExists();
-        log.debug("Пользователь {} существует: {}", userId, exists);
+        log.debug("Пользователь {} существует: {}", idProfile, exists);
         return exists;
     }
 
@@ -51,7 +53,7 @@ public class ProfileService {
      */
     public Profile getProfile(UUID userId) {
         log.debug("Получение профиля по ID: {}", userId);
-        UserValidationResponse response = sendRequest(userId, "GET_PROFILE");
+        UserValidationResponse response = sendRequest(userId, ProfileAction.GET_PROFILE.name());
         if (response != null && response.isExists() && response.getProfile() != null) {
             // Конвертируем Profile из ответа в наш DTO
             Profile profile = new Profile();
@@ -94,7 +96,7 @@ public class ProfileService {
      * Слушаем ответы от основного приложения (принимаем как String)
      */
     @KafkaListener(topics = "user-validation-responses", groupId = "chat-microservice")
-    public void handleValidationResponse(String message) {  // ← Принимаем String
+    public void handleValidationResponse(String message) {
         log.debug("📨 Получен ответ от основного приложения: {}", message);
 
         try {

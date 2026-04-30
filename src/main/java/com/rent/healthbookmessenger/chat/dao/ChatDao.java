@@ -60,12 +60,14 @@ public class ChatDao {
     public boolean update(ChatEntity chat) {
         String sql = """
                     UPDATE chat
-                    SET id_consultant=:idConsultant, last_message_at=:lastMessage
+                    SET id_consultant=:idConsultant, last_message_at=:lastMessage, status=:status
                     WHERE id = :id
                 """;
         var map = new MapSqlParameterSource()
                 .addValue("idConsultant", chat.getIdConsultant())
-                .addValue("lastMessage", chat.getLastMessageAt());
+                .addValue("lastMessage", chat.getLastMessageAt())
+                .addValue("id", chat.getId())
+                .addValue("status", chat.getStatus());
         return 1 == template.update(sql, map);
     }
 
@@ -88,15 +90,15 @@ public class ChatDao {
         return new ChatsEntity(template.query(sql, map, rowMapper));
     }
 
-    public Optional<ChatEntity> getActiveChatByIdProfile(UUID idProfile) {
+    public Optional<ChatEntity> getChatByIdProfile(UUID idProfile) {
         String sql = """
                 SELECT * FROM chat
-                WHERE id_profile = :idProfile AND status = 'ACTIVE'
+                WHERE id_profile = :idProfile
                 """;
         var map = new MapSqlParameterSource()
-                .addValue("id", idProfile);
-        ChatEntity chat = template.queryForObject(sql, map, rowMapper);
-        return Optional.ofNullable(chat);
+                .addValue("idProfile", idProfile);
+        List<ChatEntity> chat = template.query(sql, map, rowMapper);
+        return ChatValidator.validateSearchResultByProfile(chat, idProfile);
     }
 
     public ChatsEntity getActiveChatsByIdConsultant(UUID idConsultant) {

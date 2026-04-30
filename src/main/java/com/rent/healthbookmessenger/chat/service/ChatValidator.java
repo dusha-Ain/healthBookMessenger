@@ -21,4 +21,16 @@ public class ChatValidator {
         }
         return chat.stream().findFirst();
     }
+
+    public static Optional<ChatEntity> validateSearchResultByProfile(
+            List<ChatEntity> chat, UUID id){
+        if (chat.size() > 1) {
+            throw new EntityToManyResultException(
+                    String.format("More than one chat found by profile id = %s", id));
+        }
+        if (chat.isEmpty()) {
+            return Optional.empty();
+        }
+        return chat.stream().findFirst();
+    }
 }
