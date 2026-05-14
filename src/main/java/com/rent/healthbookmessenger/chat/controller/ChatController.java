@@ -4,6 +4,7 @@ package com.rent.healthbookmessenger.chat.controller;
 import com.rent.healthbookmessenger.chat.dto.Chat;
 import com.rent.healthbookmessenger.chat.dto.Chats;
 import com.rent.healthbookmessenger.chat.service.ChatService;
+import com.rent.healthbookmessenger.web.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -31,10 +33,9 @@ public class ChatController {
     }
 
     @Operation(summary = "Создать чат")
-    @PostMapping("/create/{idProfile}")
-    public ResponseEntity<Chat> createChat(
-            @Parameter(description = "Идентификатор профиля")
-            @PathVariable UUID idProfile) {
+    @PostMapping("/create")
+    public ResponseEntity<Chat> createChat(){
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called createChat by idProfile = {}", idProfile);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(chatService.createChat(idProfile));
@@ -51,11 +52,11 @@ public class ChatController {
 
     @Operation(summary = "Взять чат в рботу (консультант)")
     @PutMapping("/{idChat}/take")
+    @PreAuthorize("hasAnyRole('CONSULTANT', 'ADMIN')")
     public ResponseEntity<Chat> takeChat(
             @Parameter(description = "Идентификатор чата")
-            @PathVariable Long idChat,
-            @Parameter(description = "Идентификатор консультанта")
-            @RequestParam @NotNull UUID idConsultant) {
+            @PathVariable Long idChat) {
+        UUID idConsultant = SecurityUtils.getCurrentProfileId();
         logger.info("Called takeChat by id = {}, consultant = {}", idChat, idConsultant);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(chatService.takeChat(idChat, idConsultant));
@@ -64,11 +65,11 @@ public class ChatController {
 
     @Operation(summary = "Закрыть чат")
     @PutMapping("/{idChat}/close")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> closeChat(
             @Parameter(description = "Идентификатор чата")
-            @PathVariable Long idChat,
-            @Parameter(description = "Идентификатор профиля")
-            @RequestParam @NotNull UUID idProfile) {
+            @PathVariable Long idChat) {
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called closeChat by id = {}", idChat);
         chatService.closeChat(idChat, idProfile);
         return ResponseEntity.ok().build();
@@ -76,10 +77,10 @@ public class ChatController {
 
 
     @Operation(summary = "Получить активные чаты консультанта")
-    @GetMapping("/consultant/{idConsultant}/active")
-    public ResponseEntity<Chats> getConsultantActiveChats(
-            @Parameter(description = "Идентификатор консультанта")
-            @PathVariable UUID idConsultant) {
+    @GetMapping("/consultant/active")
+    @PreAuthorize("hasAnyRole('CONSULTANT', 'ADMIN')")
+    public ResponseEntity<Chats> getConsultantActiveChats() {
+        UUID idConsultant = SecurityUtils.getCurrentProfileId();
         logger.info("Called getConsultantActiveChats by id = {}", idConsultant);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(chatService.getConsultantActiveChats(idConsultant));
@@ -87,10 +88,10 @@ public class ChatController {
 
 
     @Operation(summary = "Получить активный чат пользователя")
-    @GetMapping("/user/{idProfile}/active")
-    public ResponseEntity<Chat> getProfileChat(
-            @Parameter(description = "Идентификатор профиля")
-            @PathVariable UUID idProfile) {
+    @GetMapping("/user/active")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Chat> getProfileChat() {
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called getProfileActiveChat by id = {}", idProfile);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(chatService.getProfileChat(idProfile));
@@ -98,10 +99,10 @@ public class ChatController {
 
 
     @Operation(summary = "Получить все чаты пользователя")
-    @GetMapping("/user/{idProfile}/all")
-    public ResponseEntity<Chats> getProfileChats(
-            @Parameter(description = "Идентификатор профиля")
-            @PathVariable UUID idProfile) {
+    @GetMapping("/user/all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Chats> getProfileChats() {
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called getProfileChats by idProfile = {}", idProfile);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(chatService.getProfileChats(idProfile));

@@ -1,4 +1,4 @@
-package com.rent.healthbookmessenger.web;
+package com.rent.healthbookmessenger.web.globalException;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;

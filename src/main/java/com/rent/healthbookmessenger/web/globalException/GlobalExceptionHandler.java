@@ -1,4 +1,4 @@
-package com.rent.healthbookmessenger.web;
+package com.rent.healthbookmessenger.web.globalException;
 
 import com.rent.healthbookmessenger.web.exception.EntityNotFoundException;
 import com.rent.healthbookmessenger.web.exception.EntityNotFoundInternalException;

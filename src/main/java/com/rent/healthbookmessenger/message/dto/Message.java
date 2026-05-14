@@ -19,7 +19,7 @@ public record Message(
         @Schema(description = "Идентификатор чата общения", example = "48")
         Long idChat,
 
-        @NotNull
+        @Null
         @Schema(description = "Идентификатор профиля-отправителя",
                 example = "0ded9ae3-22c3-4ce6-97b0-53fe1d50217d")
         UUID idSender,

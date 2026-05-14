@@ -1,4 +1,4 @@
-package com.rent.healthbookmessenger.web;
+package com.rent.healthbookmessenger.web.helpers;
 
 public class Pageable {
 

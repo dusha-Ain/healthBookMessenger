@@ -6,6 +6,9 @@ logging:
     org.springframework.jdbc.core.StatementCreatorUtils: TRACE
     com.rent.hata: DEBUG
 
+jwt:
+  secret: X9qV7fL2mP8kR3dJ6nS1bT5wC4yA0zE7gH9uI2oK5rM4nB8vC6xZ1lL3pO0iU9yT7
+
 spring:
   application:
     name: healthBookMessenger

@@ -4,6 +4,7 @@ import com.rent.healthbookmessenger.message.dto.IdMessage;
 import com.rent.healthbookmessenger.message.dto.Message;
 import com.rent.healthbookmessenger.message.dto.Messages;
 import com.rent.healthbookmessenger.message.service.MessageService;
+import com.rent.healthbookmessenger.web.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,21 +34,30 @@ public class MessageController {
 
     @Operation(summary = "Отправить сообщение")
     @PostMapping("/send")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Message> sendMessage(
             @Parameter(description = "Данные сообщения")
             @Valid @RequestBody Message request) {
         logger.info("Called sendMessage by idChat = {}", request.idChat());
+        UUID idSender = SecurityUtils.getCurrentProfileId();
+        Message message = new Message(
+                null,
+                request.idChat(),
+                idSender,
+                request.content(),
+                null
+        );
         return ResponseEntity.status(HttpStatus.OK)
-                .body(service.sendMessage(request));
+                .body(service.sendMessage(message));
     }
 
     @Operation(summary = "Получить сообщение чата")
     @GetMapping("/chat/{idChat}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Messages> getMessages(
             @Parameter(description = "Идентфиикатор чата")
-            @PathVariable Long idChat,
-            @Parameter(description = "Идентификатор профиля")
-            @RequestParam UUID idProfile) {
+            @PathVariable Long idChat){
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called getMessage by idProfile = {} in chat = {}", idProfile, idChat);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(service.getMessages(idChat, idProfile));
@@ -54,15 +65,15 @@ public class MessageController {
 
     @Operation(summary = "Редактировать сообщение")
     @PutMapping("/{idMessage}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Message> editMessage(
             @Parameter(description = "Идентфиикатор чата")
             @RequestParam Long idChat,
             @Parameter(description = "Идентфиикатор сообщения")
             @PathVariable Long idMessage,
-            @Parameter(description = "Идентфиикатор профиля")
-            @RequestParam UUID idProfile,
             @Parameter(description = "Текстовое сообщение")
             @RequestBody String content) {
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called editMessage by id = {}, profile = {}, in chat = {}",
                 idMessage, idProfile, idChat);
         var id = new IdMessage(idChat, idMessage, idProfile);
@@ -72,13 +83,13 @@ public class MessageController {
 
     @Operation(summary = "Удалить сообщение")
     @DeleteMapping("/{idMessage}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteMessage(
             @Parameter(description = "Идентфиикатор чата")
             @RequestParam Long idChat,
             @Parameter(description = "Идентфиикатор сообщения")
-            @PathVariable Long idMessage,
-            @Parameter(description = "Идентфиикатор профиля")
-            @RequestParam UUID idProfile) {
+            @PathVariable Long idMessage){
+        UUID idProfile = SecurityUtils.getCurrentProfileId();
         logger.info("Called deleteMessage by id = {}, profile = {}, in chat = {}",
                 idMessage, idProfile, idChat);
         var id = new IdMessage(idChat, idMessage, idProfile);
